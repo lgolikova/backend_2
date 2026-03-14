@@ -1,18 +1,87 @@
-const getUsers = (request, response) => {};
+const User = require("../models/user");
 
-const getUser = (request, response) => {
-    const { user_id } = request.params;
-    response.status(200);
-    response.send(`User with id: ${user_id}`);
+const getUsers = (req, res) => {
+    return User.find({})
+        .then((data) => {
+            res.status(200).send(data);
+        })
+        .catch((err) => res.status(500).send(err.message));
 };
 
-const createUser = (request, response) => {
-    response.status(201);
-    response.send(request.body);
+const createUser = (req, res) => {
+    return User.create({ ...req.body })
+        .then((user) => {
+            res.status(201).send(user);
+        })
+        .catch((err) => {
+            if (err.name === "ValidationError") {
+                return res.status(400).send(err.message);
+            }
+            res.status(500).send(err.message);
+        });
 };
 
-const updateUser = (request, response) => {};
+const getUser = (req, res) => {
+    const { user_id } = req.params;
+    return User.findById(user_id)
+        .then((user) => {
+            if (!user) {
+                return res
+                    .status(404)
+                    .send("Пользователь с таким id не найден");
+            }
+            res.status(200).send(user);
+        })
+        .catch((err) => res.status(500).send(err.message));
+};
 
-const deleteUser = (request, response) => {};
+const updateUser = (req, res) => {
+    const { user_id } = req.params;
+    return User.findByIdAndUpdate(user_id, { ...req.body })
+        .then((user) => {
+            if (!user) {
+                return res
+                    .status(404)
+                    .send("Пользователь с таким id не найден");
+            }
+            res.status(200).send(user);
+        })
+        .catch((err) => res.status(500).send(err.message));
+};
 
-module.exports = { getUsers, getUser, createUser, updateUser, deleteUser };
+const deleteUser = (req, res) => {
+    const { user_id } = req.params;
+    return User.findByIdAndDelete(user_id)
+        .then((user) => {
+            if (!user) {
+                return res
+                    .status(404)
+                    .send("Пользователь с таким id не найден");
+            }
+            res.status(200).send("Success");
+        })
+        .catch((err) => res.status(500).send(err.message));
+};
+
+const getUserBook = (req, res) => {
+    // Get user book
+};
+
+const takeUserBook = (req, res) => {
+    // Take user book
+};
+
+const returnUserBook = (req, res) => {
+    // Return user book
+};
+
+module.exports = {
+    getUsers,
+    createUser,
+    getUser,
+    updateUser,
+    deleteUser,
+    getUserBook,
+    takeUserBook,
+    returnUserBook,
+};
