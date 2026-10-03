@@ -1,16 +1,42 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const bookRouter = require("./routes/books");
+const userRouter = require("./routes/users");
+const loggerApp = require("./middlewares/loggerApp");
 
 dotenv.config();
 
+const { PORT = 3005, API_URL = "http://127.0.0.1" } = process.env;
+
+mongoose
+    .connect(process.env.MONGO_URL)
+    .then(() => {
+        console.log("Connected to MongoDb");
+    })
+    .catch((err) => {
+        console.error("Error connecting to MongoDB:", err);
+    });
+
 const app = express();
 
-const { PORT = 3000, API_URL = "http://127.0.0.1" } = process.env;
+app.use(cors());
+app.use(loggerApp);
+app.use(bodyParser.json());
 
-app.get("/", (request, response) => {
-    response.status(200);
-    response.send("Hello, World!");
+app.get("/", (req, res) => {
+    res.status(200);
+    res.send("Welcome to the library application!");
 });
+
+app.get("/ping", (req, res) => {
+    res.status(200).send("pong");
+});
+
+app.use(bookRouter);
+app.use(userRouter);
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен по адресу ${API_URL}:${PORT}`);
